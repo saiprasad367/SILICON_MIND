@@ -39,13 +39,17 @@ RETRAIN_INTERVAL  = 10   # retrain every N new uploads
 # ─── Allowed file extensions ──────────────────────────────────────────────────
 ALLOWED_EXTENSIONS = {".rpt", ".txt", ".xdc", ".log"}
 
-# ─── CORS -- allow all Vite dev ports ─────────────────────────────────────────
-CORS_ORIGINS = [
-    "http://localhost:5173", "http://localhost:8080",
-    "http://localhost:8081", "http://localhost:8082",
-    "http://localhost:3000", "http://127.0.0.1:5173",
-    "http://127.0.0.1:8081", "http://127.0.0.1:8082",
-]
+# ─── CORS -- allow all Vite dev ports + Production ───────────────────────────
+_env_cors = os.environ.get("CORS_ORIGINS", "")
+if _env_cors:
+    CORS_ORIGINS = [o.strip() for o in _env_cors.split(",")]
+else:
+    CORS_ORIGINS = [
+        "http://localhost:5173", "http://localhost:8080",
+        "http://localhost:8081", "http://localhost:8082",
+        "http://localhost:3000", "http://127.0.0.1:5173",
+        "http://127.0.0.1:8081", "http://127.0.0.1:8082",
+    ]
 
 # Create all required directories on import
 for _dir in [UPLOAD_FOLDER, MODEL_FOLDER, DATASET_FOLDER, REPORT_FOLDER,
