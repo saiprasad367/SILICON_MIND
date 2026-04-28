@@ -79,22 +79,26 @@ def create_app() -> Flask:
     return app
 
 
+# ─── Production Entry Point ───────────────────────────────────────────────────
+
+# 1. Initialize core services
+logger.info("🚀 Initialising FPGA AI Pilot backend …")
+init_db()
+load_models()
+load_agent()
+
+# 2. Create the Flask app instance at module level (required for Gunicorn)
+app = create_app()
+
+from services.mlservice import models_ready
+if not models_ready():
+    logger.warning(
+        "⚠️  ML models not found! Backend will run in rule-based fallback mode."
+    )
+else:
+    logger.info("✅ ML models loaded — XGBoost + MLP ensemble ready")
+
+# ─── Dev Server ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    logger.info("🚀 Initialising FPGA AI Pilot backend …")
-    init_db()
-    load_models()
-    load_agent()
-
-    app = create_app()
-
-    from services.mlservice import models_ready
-    if not models_ready():
-        logger.warning(
-            "⚠️  ML models not found! Run: python train_initial_model.py  "
-            "(uses 200k dataset — takes ~2–5 minutes)"
-        )
-    else:
-        logger.info("✅ ML models loaded — XGBoost + MLP ensemble ready")
-
-    logger.info(f"✅ Backend ready — http://localhost:{PORT}")
+    logger.info(f"✅ Dev server starting — http://localhost:{PORT}")
     app.run(host="0.0.0.0", port=PORT, debug=DEBUG, threaded=True)
